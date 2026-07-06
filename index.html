@@ -7,9 +7,9 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Absensi SPPG">
-<meta name="description" content="Sistem Absensi Karyawan SPPG Bagan">
-<title>Absensi SPPG</title>
+<meta name="apple-mobile-web-app-title" content="Absensi">
+<meta name="description" content="Sistem Absensi Karyawan Multi-Lokasi">
+<title>Absensi Karyawan</title>
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
@@ -17,7 +17,6 @@
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:sans-serif;background:#f5f5f5;min-height:100vh;min-height:100dvh}
 
-/* Install Banner */
 .install-banner{background:linear-gradient(135deg,#1D9E75,#0F6E56);color:#fff;padding:12px 16px;display:none;align-items:center;gap:12px;position:fixed;bottom:0;left:0;right:0;z-index:300;box-shadow:0 -2px 12px rgba(0,0,0,.2)}
 .install-banner.show{display:flex}
 .ib-icon{width:42px;height:42px;background:rgba(255,255,255,.2);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
@@ -37,7 +36,7 @@ h1{text-align:center;font-size:18px;margin-bottom:4px}
 .u-nama{font-size:16px;font-weight:700;color:#085041;margin-bottom:3px}
 .u-email{font-size:11px;color:#666;margin-bottom:3px}
 .u-bagian{font-size:12px;color:#1D9E75;font-weight:500}
-.gps-box{border-radius:10px;padding:8px 12px;margin-bottom:12px;font-size:12px;text-align:center;display:none}
+.gps-box{border-radius:10px;padding:10px 12px;margin-bottom:14px;font-size:12px;text-align:center}
 .gps-box.ok{background:#E1F5EE;color:#085041}
 .gps-box.err{background:#FCEBEB;color:#A32D2D}
 .gps-box.loading{background:#FAEEDA;color:#854F0B}
@@ -56,8 +55,9 @@ input[type=email]:focus{border-color:#1D9E75}
 .result.err{background:#FCEBEB;color:#A32D2D}
 .loading{opacity:.6;pointer-events:none}
 .admin-btn{position:absolute;bottom:72px;right:16px;background:none;border:none;font-size:11px;color:#ccc;cursor:pointer;padding:6px}
+.daftar-link{text-align:center;margin-top:14px}
+.daftar-link a{font-size:11px;color:#aaa;text-decoration:none}
 
-/* MODAL */
 .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
 .modal-bg.show{display:flex}
 .modal{background:#fff;border-radius:16px;padding:24px;width:100%;max-width:340px;max-height:90vh;overflow-y:auto}
@@ -68,7 +68,6 @@ input[type=email]:focus{border-color:#1D9E75}
 .btn-cancel{background:#f0f0f0;color:#555;padding:10px;border:none;border-radius:10px;font-size:13px;cursor:pointer}
 .pw-err{color:#E24B4A;font-size:12px;text-align:center;margin-bottom:8px;display:none}
 
-/* ADMIN */
 .page-admin{display:none;padding:16px 16px 90px}
 .admin-header{background:linear-gradient(135deg,#1D9E75,#0F6E56);color:#fff;border-radius:14px;padding:14px 18px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between}
 .admin-header h2{font-size:16px;font-weight:700}
@@ -113,32 +112,16 @@ tr:last-child td{border-bottom:none}
 .aalert{padding:8px 12px;border-radius:10px;font-size:12px;margin-top:8px;display:none}
 .aalert.success{background:#E1F5EE;color:#085041}
 .aalert.error{background:#FCEBEB;color:#A32D2D}
-.toggle-gps{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
-.toggle{position:relative;width:44px;height:24px}
-.toggle input{opacity:0;width:0;height:0}
-.slider{position:absolute;cursor:pointer;inset:0;background:#ccc;border-radius:24px;transition:.3s}
-.slider:before{position:absolute;content:"";height:18px;width:18px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.3s}
-input:checked+.slider{background:#1D9E75}
-input:checked+.slider:before{transform:translateX(20px)}
-.gps-status-box{border-radius:10px;padding:10px 12px;margin-bottom:10px;font-size:12px;line-height:1.5}
-.gps-status-box.active{background:#E1F5EE;color:#085041}
-.gps-status-box.inactive{background:#FCEBEB;color:#A32D2D}
-.map-wrap{border-radius:10px;overflow:hidden;margin-bottom:12px;border:1.5px solid #e0e0e0;display:none}
-.ugps{border-radius:10px;padding:10px 12px;font-size:12px;margin-bottom:12px;text-align:center;display:none}
-.ugps.ok{background:#E1F5EE;color:#085041}
-.ugps.err{background:#FCEBEB;color:#A32D2D}
-.ugps.loading{background:#FAEEDA;color:#854F0B}
+.info-line{display:flex;justify-content:space-between;font-size:12px;padding:7px 0;border-bottom:1px solid #f2f2f2}
+.info-line:last-child{border-bottom:none}
+.info-line b{color:#333}
 </style>
 </head>
 <body>
 
-<!-- Install Banner -->
 <div class="install-banner" id="install-banner">
   <div class="ib-icon">✋</div>
-  <div class="ib-text">
-    <strong>Install Aplikasi Absensi</strong>
-    <span>Tambahkan ke layar utama HP kamu</span>
-  </div>
+  <div class="ib-text"><strong>Install Aplikasi Absensi</strong><span>Tambahkan ke layar utama HP kamu</span></div>
   <button class="ib-btn" onclick="installPWA()">Install</button>
   <button class="ib-close" onclick="closeBanner()">✕</button>
 </div>
@@ -148,41 +131,43 @@ input:checked+.slider:before{transform:translateX(20px)}
   <div class="card">
     <div class="logo">✋</div>
     <h1>Absensi Karyawan</h1>
-    <div class="sub" id="lokasi-label">SPPG Bagan</div>
+    <div class="sub" id="lokasi-label">Mendeteksi lokasi...</div>
     <div class="info-box">
       <span id="tgl-hari">...</span>
       <span id="jam-skrg" style="font-weight:600">...</span>
     </div>
-    <div class="user-box" id="user-box">
-      <div class="u-nama" id="u-nama"></div>
-      <div class="u-email" id="u-email"></div>
-      <div class="u-bagian" id="u-bagian"></div>
+    <div class="gps-box loading" id="gps-box">📡 Mendeteksi lokasi GPS...</div>
+
+    <div id="konten-absen" style="display:none">
+      <div class="user-box" id="user-box">
+        <div class="u-nama" id="u-nama"></div>
+        <div class="u-email" id="u-email"></div>
+        <div class="u-bagian" id="u-bagian"></div>
+      </div>
+      <div id="form-area">
+        <label>Email Kamu</label>
+        <input type="email" id="inp-gmail" placeholder="nama@gmail.com" onkeydown="if(event.key==='Enter')verif()">
+        <div class="hint">Masukkan email yang sudah didaftarkan admin lokasi</div>
+        <button class="btn-verif" onclick="verif()">🔍 Verifikasi Email</button>
+      </div>
+      <div class="btns" id="absen-btns">
+        <button class="btn-d" onclick="absen('datang')">✅ Datang</button>
+        <button class="btn-p" onclick="absen('pulang')">🚪 Pulang</button>
+      </div>
+      <button class="btn-ganti" id="btn-ganti" onclick="gantiAkun()">Bukan kamu? Ganti akun</button>
+      <div class="result" id="result"></div>
     </div>
-    <div class="gps-box loading" id="gps-box">📡 Mendeteksi lokasi...</div>
-    <div id="form-area">
-      <label>Gmail Kamu</label>
-      <input type="email" id="inp-gmail" placeholder="nama@gmail.com"
-        onkeydown="if(event.key==='Enter')verif()">
-      <div class="hint">Masukkan Gmail yang sudah didaftarkan admin</div>
-      <button class="btn-verif" onclick="verif()">🔍 Verifikasi Gmail</button>
-    </div>
-    <div class="btns" id="absen-btns">
-      <button class="btn-d" onclick="absen('datang')">✅ Datang</button>
-      <button class="btn-p" onclick="absen('pulang')">🚪 Pulang</button>
-    </div>
-    <button class="btn-ganti" id="btn-ganti" onclick="gantiAkun()">Bukan kamu? Ganti akun</button>
-    <div class="result" id="result"></div>
+    <div class="daftar-link"><a href="daftar-lokasi.html">+ Daftarkan lokasi baru</a></div>
   </div>
   <button class="admin-btn" onclick="bukaAdmin()">⚙</button>
 </div>
 
-<!-- MODAL PASSWORD -->
+<!-- MODAL PASSWORD ADMIN LOKASI -->
 <div class="modal-bg" id="modal-pw">
   <div class="modal">
-    <div class="modal-title">🔐 Login Admin</div>
+    <div class="modal-title">🔐 Login Admin Lokasi</div>
     <div class="pw-err" id="pw-err">Password salah!</div>
-    <input type="password" id="inp-pw" placeholder="Password admin"
-      onkeydown="if(event.key==='Enter')cekPw()">
+    <input type="password" id="inp-pw" placeholder="Password admin" onkeydown="if(event.key==='Enter')cekPw()">
     <div class="modal-btns">
       <button class="btn-ok" onclick="cekPw()">Masuk</button>
       <button class="btn-cancel" onclick="tutupModal('modal-pw')">Batal</button>
@@ -190,14 +175,14 @@ input:checked+.slider:before{transform:translateX(20px)}
   </div>
 </div>
 
-<!-- MODAL EDIT -->
+<!-- MODAL EDIT KARYAWAN -->
 <div class="modal-bg" id="modal-edit">
   <div class="modal">
     <div class="modal-title">✏️ Edit Karyawan</div>
-    <label>Nama</label><input type="text" id="edit-nama" style="margin-bottom:8px">
-    <label>Gmail</label><input type="email" id="edit-email" style="margin-bottom:8px">
-    <label>Bagian</label><input type="text" id="edit-bagian" style="margin-bottom:12px">
-    <input type="hidden" id="edit-idx">
+    <label>Nama</label><input type="text" id="edit-nama">
+    <label>Email</label><input type="email" id="edit-email">
+    <label>Bagian</label><input type="text" id="edit-bagian">
+    <input type="hidden" id="edit-oldemail">
     <div class="modal-btns">
       <button class="btn-ok" onclick="simpanEdit()">Simpan</button>
       <button class="btn-cancel" onclick="tutupModal('modal-edit')">Batal</button>
@@ -205,16 +190,16 @@ input:checked+.slider:before{transform:translateX(20px)}
   </div>
 </div>
 
-<!-- HALAMAN ADMIN -->
+<!-- HALAMAN ADMIN LOKASI -->
 <div class="page-admin" id="page-admin">
   <div class="admin-header">
-    <div><h2>⚙️ Panel Admin</h2><p id="admin-sub">SPPG Bagan</p></div>
+    <div><h2>⚙️ Panel Admin</h2><p id="admin-sub">—</p></div>
     <button class="keluar-btn" onclick="keluarAdmin()">← Keluar</button>
   </div>
   <div class="tabs">
     <button class="tab active" onclick="switchTab('monitor')">📊 Monitor</button>
     <button class="tab" onclick="switchTab('karyawan')">👥 Karyawan</button>
-    <button class="tab" onclick="switchTab('gps')">📍 GPS</button>
+    <button class="tab" onclick="switchTab('info')">📍 Info Lokasi</button>
     <button class="tab" onclick="switchTab('setting')">⚙️ Setting</button>
   </div>
 
@@ -246,7 +231,7 @@ input:checked+.slider:before{transform:translateX(20px)}
     <div class="acard">
       <div class="acard-title">➕ Tambah Karyawan</div>
       <label>Nama</label><input class="ainput" type="text" id="inp-nama" placeholder="Ahmad Fauzi">
-      <label>Gmail</label><input class="ainput" type="email" id="inp-email" placeholder="ahmad@gmail.com">
+      <label>Email</label><input class="ainput" type="email" id="inp-email" placeholder="ahmad@gmail.com">
       <label>Bagian</label><input class="ainput" type="text" id="inp-bagian" placeholder="Persiapan / Masak / Distribusi">
       <div class="rowbtn">
         <button class="abtn primary" onclick="tambah()">Simpan</button>
@@ -260,136 +245,57 @@ input:checked+.slider:before{transform:translateX(20px)}
         <span id="jml-badge" style="background:#E1F5EE;color:#085041;padding:2px 8px;border-radius:20px;font-size:11px">0 orang</span>
       </div>
       <input class="ainput" type="text" id="cari-k" placeholder="🔍 Cari..." oninput="renderTabel()">
-      <div id="tbl-wrap"><div class="empty">Belum ada karyawan</div></div>
-      <div class="rowbtn"><button class="abtn primary" onclick="exportCSV()">⬇️ Export CSV</button></div>
+      <div id="tbl-wrap"><div class="empty">⏳ Memuat...</div></div>
     </div>
   </div>
 
-  <div id="tab-gps" class="section">
+  <div id="tab-info" class="section">
     <div class="acard">
-      <div class="acard-title">📍 Titik Lokasi Absen</div>
-      <div class="toggle-gps">
-        <span style="font-size:13px;color:#444">Aktifkan validasi GPS</span>
-        <label class="toggle"><input type="checkbox" id="gps-toggle" checked onchange="toggleGPS(this)"><span class="slider"></span></label>
-      </div>
-      <div class="gps-status-box active" id="gps-status-box">✅ Validasi GPS aktif</div>
-      <div style="background:#f8f8f8;border-radius:10px;padding:12px;margin-bottom:14px;font-size:12px">
-        <div style="color:#888;margin-bottom:4px">Titik absen tersimpan:</div>
-        <div style="font-weight:600;color:#085041;font-size:13px" id="cur-coords">Belum diset</div>
-        <div style="color:#888;margin-top:6px">Radius: <strong id="cur-radius-txt">25 meter</strong></div>
-      </div>
-      <div class="map-wrap" id="map-wrap">
-        <iframe id="map-frame" style="width:100%;height:240px;border:none"></iframe>
-      </div>
-      <div class="ugps" id="admin-gps-status"></div>
-      <button class="abtn primary" style="width:100%;padding:12px;font-size:13px;margin-bottom:10px" onclick="deteksiPosisiAdmin()">
-        📡 Deteksi Posisi Saya Sekarang
-      </button>
-      <div id="simpan-area" style="display:none">
-        <label style="font-size:12px;color:#666;margin-bottom:4px;display:block">Radius absen: <strong id="radius-val2">25</strong> meter</label>
-        <input type="range" id="gps-radius" min="10" max="200" value="25" style="width:100%;margin:4px 0 14px"
-          oninput="document.getElementById('radius-val2').textContent=this.value">
-        <button class="abtn primary" style="width:100%;padding:12px;font-size:13px" onclick="simpanGPS()">
-          💾 Simpan Titik Lokasi Ini
-        </button>
-      </div>
-      <div class="aalert" id="a-gps"></div>
+      <div class="acard-title">📍 Info Lokasi</div>
+      <div class="info-line"><span>Nama Lokasi</span><b id="info-nama">—</b></div>
+      <div class="info-line"><span>Koordinat</span><b id="info-koor">—</b></div>
+      <div class="info-line"><span>Radius Absen</span><b id="info-radius">—</b></div>
+      <div class="info-line"><span>Status</span><b id="info-status">—</b></div>
+      <div style="font-size:11px;color:#aaa;margin-top:10px">Untuk mengubah titik lokasi atau radius, hubungi super admin.</div>
     </div>
   </div>
 
   <div id="tab-setting" class="section">
     <div class="acard">
       <div class="acard-title">🔐 Ganti Password Admin</div>
+      <label>Password Lama</label><input class="ainput" type="password" id="pw-lama">
       <label>Password Baru</label><input class="ainput" type="password" id="pw-baru" placeholder="Minimal 4 karakter">
-      <label>Konfirmasi</label><input class="ainput" type="password" id="pw-konfirm" placeholder="Ulangi password">
+      <label>Konfirmasi</label><input class="ainput" type="password" id="pw-konfirm">
       <div class="rowbtn"><button class="abtn primary" onclick="gantiPw()">Simpan Password</button></div>
       <div class="aalert" id="a-pw"></div>
-    </div>
-    <div class="acard">
-      <div class="acard-title">📱 Tentang Aplikasi</div>
-      <div style="font-size:12px;color:#666;line-height:1.8">
-        <div>Versi: 1.0.0</div>
-        <div>Platform: PWA (Progressive Web App)</div>
-        <div>Backend: Google Apps Script</div>
-        <div>Data: Google Sheets</div>
-      </div>
     </div>
   </div>
 </div>
 
 <script>
-// =============================================
-// GANTI URL INI DENGAN URL APPS SCRIPT TERBARU
-// =============================================
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzoIlzn7KRBZn9VLgTpjb-3UCtdFO7BTTeioZaYPd5zWsZMMxnDUSypMoBJL1mmKGdp9g/exec";
+// GANTI URL INI dengan Web App URL Apps Script Master Sheet
+const SCRIPT_URL = "GANTI_DENGAN_URL_APPS_SCRIPT_MASTER";
 
-// =============================================
-// PWA - Service Worker & Install
-// =============================================
 let deferredPrompt = null;
-
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('sw.js')
-      .then(reg => console.log('SW registered:', reg.scope))
-      .catch(err => console.log('SW error:', err));
-  });
+  window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(()=>{}));
 }
-
 window.addEventListener('beforeinstallprompt', e => {
-  e.preventDefault();
-  deferredPrompt = e;
-  if (!localStorage.getItem('pwa_installed')) {
-    setTimeout(() => document.getElementById('install-banner').classList.add('show'), 2000);
-  }
+  e.preventDefault(); deferredPrompt = e;
+  if (!localStorage.getItem('pwa_installed')) setTimeout(() => document.getElementById('install-banner').classList.add('show'), 2000);
 });
+window.addEventListener('appinstalled', () => { localStorage.setItem('pwa_installed','1'); document.getElementById('install-banner').classList.remove('show'); deferredPrompt=null; });
+function installPWA(){ if(deferredPrompt){deferredPrompt.prompt();deferredPrompt.userChoice.then(r=>{if(r.outcome==='accepted')localStorage.setItem('pwa_installed','1');document.getElementById('install-banner').classList.remove('show');deferredPrompt=null;});} else {alert('Tap menu ⋮ di Chrome → "Tambahkan ke layar utama"');closeBanner();} }
+function closeBanner(){ document.getElementById('install-banner').classList.remove('show'); }
 
-window.addEventListener('appinstalled', () => {
-  localStorage.setItem('pwa_installed', '1');
-  document.getElementById('install-banner').classList.remove('show');
-  deferredPrompt = null;
-});
-
-function installPWA() {
-  if (deferredPrompt) {
-    deferredPrompt.prompt();
-    deferredPrompt.userChoice.then(r => {
-      if (r.outcome === 'accepted') localStorage.setItem('pwa_installed', '1');
-      document.getElementById('install-banner').classList.remove('show');
-      deferredPrompt = null;
-    });
-  } else {
-    alert('Tap menu ⋮ di Chrome → "Tambahkan ke layar utama"');
-    closeBanner();
-  }
-}
-function closeBanner() {
-  document.getElementById('install-banner').classList.remove('show');
-}
-
-// =============================================
-// APP
-// =============================================
-let userEmail = localStorage.getItem("absen_gmail") || "";
+let userEmail = localStorage.getItem("absen_email") || "";
 let userName = "", userBagian = "";
 let userLat = null, userLng = null;
-let adminLat = null, adminLng = null;
-let gpsAktif = true;
-let settingGPS = {lat:"0",lng:"0",radius:"25",gps_aktif:"true"};
-let karyawan = JSON.parse(localStorage.getItem("karyawan_sppg") || "[]");
-let absensiData = [], filterAktif = "all";
-let ADMIN_PW = localStorage.getItem("admin_pw_sppg") || "admin123";
+let lokasi = null; // {SheetID, NamaLokasi, Lat, Lng, Radius, Status}
+let karyawan = [], absensiData = [], filterAktif = "all";
+let adminNamaLokasi = "";
 
 const HARI=["Minggu","Senin","Selasa","Rabu","Kamis","Jumat","Sabtu"];
-const nowD=new Date();
-const tglStr=HARI[nowD.getDay()]+", "+nowD.getDate().toString().padStart(2,"0")+"/"+(nowD.getMonth()+1).toString().padStart(2,"0")+"/"+nowD.getFullYear();
-const params=new URLSearchParams(location.search);
-const lokasiLabel=params.get("lokasi")||"SPPG Bagan";
-
-document.getElementById("lokasi-label").textContent=lokasiLabel;
-document.getElementById("admin-sub").textContent="SPPG Bagan • "+tglStr;
-document.getElementById("mon-tgl").textContent="📅 "+tglStr;
-
 function updateClock(){
   const n=new Date();
   document.getElementById("tgl-hari").textContent=HARI[n.getDay()]+", "+n.getDate().toString().padStart(2,"0")+"/"+(n.getMonth()+1).toString().padStart(2,"0")+"/"+n.getFullYear();
@@ -403,48 +309,52 @@ function hitungJarak(la1,lo1,la2,lo2){
   return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
 }
 
-async function loadSettingGPS(){
-  try{const r=await fetch(SCRIPT_URL+"?action=getSetting");const d=await r.json();if(d.status==="ok"){settingGPS=d.setting;gpsAktif=d.setting.gps_aktif!=="false";}}catch(e){}
-}
-
-function deteksiLokasiUser(){
+// ---- deteksi lokasi via GPS saat app dibuka ----
+function deteksiLokasi(){
   const box=document.getElementById("gps-box");
-  box.style.display="block";box.className="gps-box loading";box.textContent="📡 Mendeteksi lokasi...";
-  if(!navigator.geolocation){box.className="gps-box err";box.textContent="❌ GPS tidak didukung";return;}
-  navigator.geolocation.getCurrentPosition(pos=>{
+  box.className="gps-box loading";box.textContent="📡 Mendeteksi lokasi GPS...";
+  if(!navigator.geolocation){box.className="gps-box err";box.textContent="❌ GPS tidak didukung perangkat ini";return;}
+  navigator.geolocation.getCurrentPosition(async pos=>{
     userLat=pos.coords.latitude;userLng=pos.coords.longitude;
-    if(!gpsAktif){box.style.display="none";return;}
-    const lat=parseFloat(settingGPS.lat||0),lng=parseFloat(settingGPS.lng||0);
-    if(lat===0&&lng===0){box.style.display="none";return;}
-    const jarak=hitungJarak(userLat,userLng,lat,lng);
-    const radius=parseFloat(settingGPS.radius||25);
-    if(jarak<=radius){box.className="gps-box ok";box.textContent="✅ Lokasi terverifikasi ("+Math.round(jarak)+"m)";}
-    else{box.className="gps-box err";box.textContent="❌ Di luar area absen ("+Math.round(jarak)+"m, maks "+radius+"m)";}
+    try{
+      const r=await fetch(SCRIPT_URL+"?action=findLokasiByGPS&lat="+userLat+"&lng="+userLng);
+      const d=await r.json();
+      if(d.status==="ok"){
+        lokasi=d.lokasi;
+        document.getElementById("lokasi-label").textContent=lokasi.NamaLokasi;
+        box.className="gps-box ok";box.textContent="✅ Lokasi terverifikasi ("+Math.round(lokasi.jarak)+"m)";
+        document.getElementById("konten-absen").style.display="block";
+        if(userEmail) autoRestore(userEmail);
+      } else if(d.status==="suspended"){
+        document.getElementById("lokasi-label").textContent="Tidak tersedia";
+        box.className="gps-box err";box.textContent="⛔ "+d.message;
+      } else {
+        document.getElementById("lokasi-label").textContent="Lokasi tidak terdaftar";
+        box.className="gps-box err";box.textContent="❌ "+(d.message||"Anda tidak berada di area lokasi manapun");
+      }
+    }catch(e){ box.className="gps-box err";box.textContent="❌ Gagal terhubung ke server"; }
   },()=>{
-    if(!gpsAktif){box.style.display="none";return;}
-    box.className="gps-box err";box.textContent="❌ Gagal deteksi lokasi. Izinkan akses GPS";
-    userLat=null;userLng=null;
-  },{enableHighAccuracy:true,timeout:10000});
+    box.className="gps-box err";box.textContent="❌ Gagal deteksi lokasi. Izinkan akses GPS lalu muat ulang halaman.";
+  },{enableHighAccuracy:true,timeout:15000,maximumAge:0});
 }
-
-document.getElementById("user-box").style.display="none";
-loadSettingGPS().then(()=>{deteksiLokasiUser();if(userEmail)autoRestore(userEmail);});
+deteksiLokasi();
 
 async function autoRestore(email){
-  try{const r=await fetch(SCRIPT_URL+"?action=cek&email="+encodeURIComponent(email));const d=await r.json();
+  try{const r=await fetch(SCRIPT_URL+"?action=cek&sheetId="+lokasi.SheetID+"&email="+encodeURIComponent(email));const d=await r.json();
     if(d.status==="ok"){userName=d.nama;userBagian=d.bagian;tampilUser(email,d.nama,d.bagian);}
-    else{localStorage.removeItem("absen_gmail");userEmail="";}
+    else{localStorage.removeItem("absen_email");userEmail="";}
   }catch(e){}
 }
 
 async function verif(){
+  if(!lokasi){showRes("Lokasi belum terverifikasi","err");return;}
   const email=document.getElementById("inp-gmail").value.trim().toLowerCase();
-  if(!email||!email.includes("@")){showRes("Masukkan Gmail yang valid","err");return;}
+  if(!email||!email.includes("@")){showRes("Masukkan email yang valid","err");return;}
   showRes("⏳ Memverifikasi...","warn");
   document.querySelector(".card").classList.add("loading");
-  try{const r=await fetch(SCRIPT_URL+"?action=cek&email="+encodeURIComponent(email));const d=await r.json();
-    if(d.status==="ok"){userEmail=email;userName=d.nama;userBagian=d.bagian;localStorage.setItem("absen_gmail",email);tampilUser(email,d.nama,d.bagian);document.getElementById("result").style.display="none";}
-    else showRes("❌ Gmail tidak terdaftar.\nHubungi admin.","err");
+  try{const r=await fetch(SCRIPT_URL+"?action=cek&sheetId="+lokasi.SheetID+"&email="+encodeURIComponent(email));const d=await r.json();
+    if(d.status==="ok"){userEmail=email;userName=d.nama;userBagian=d.bagian;localStorage.setItem("absen_email",email);tampilUser(email,d.nama,d.bagian);document.getElementById("result").style.display="none";}
+    else showRes("❌ Email tidak terdaftar di lokasi ini.\nHubungi admin lokasi.","err");
   }catch(e){showRes("Gagal terhubung ke server","err");}
   document.querySelector(".card").classList.remove("loading");
 }
@@ -458,9 +368,8 @@ function tampilUser(email,nama,bagian){
   document.getElementById("absen-btns").style.display="grid";
   document.getElementById("btn-ganti").style.display="block";
 }
-
 function gantiAkun(){
-  localStorage.removeItem("absen_gmail");userEmail="";userName="";userBagian="";
+  localStorage.removeItem("absen_email");userEmail="";userName="";userBagian="";
   document.getElementById("user-box").style.display="none";
   document.getElementById("form-area").style.display="block";
   document.getElementById("absen-btns").style.display="none";
@@ -469,107 +378,138 @@ function gantiAkun(){
   document.getElementById("result").style.display="none";
 }
 
-async function absen(tipe){
-  if(!userEmail){showRes("Verifikasi Gmail dulu!","err");return;}
-  if(gpsAktif){
-    if(!userLat||!userLng){showRes("❌ GPS belum terdeteksi.\nIzinkan akses lokasi.","err");deteksiLokasiUser();return;}
-    const lat=parseFloat(settingGPS.lat||0),lng=parseFloat(settingGPS.lng||0);
-    if(lat!==0&&lng!==0){
-      const jarak=hitungJarak(userLat,userLng,lat,lng);
-      const radius=parseFloat(settingGPS.radius||25);
-      if(jarak>radius){showRes("❌ Kamu berada "+Math.round(jarak)+"m dari lokasi absen.\nMaksimal "+radius+"m.\nAbsen hanya bisa di lokasi kerja.","err");return;}
-    }
-  }
+async function absen(jenis){
+  if(!lokasi){showRes("Lokasi belum terverifikasi","err");return;}
+  if(!userEmail){showRes("Verifikasi email dulu!","err");return;}
+  if(!userLat||!userLng){showRes("❌ GPS belum terdeteksi. Muat ulang halaman.","err");return;}
+  const jarak=hitungJarak(userLat,userLng,lokasi.Lat,lokasi.Lng);
+  if(jarak>lokasi.Radius){showRes("❌ Kamu berada "+Math.round(jarak)+"m dari lokasi.\nMaksimal "+lokasi.Radius+"m.","err");return;}
   document.querySelector(".card").classList.add("loading");
   try{
-    let url=SCRIPT_URL+"?action=absen&email="+encodeURIComponent(userEmail)+"&tipe="+tipe+"&lokasi="+encodeURIComponent(lokasiLabel);
-    if(userLat&&userLng) url+="&lat="+userLat+"&lng="+userLng;
+    const url=SCRIPT_URL+"?action=absen&sheetId="+lokasi.SheetID+"&email="+encodeURIComponent(userEmail)+"&jenis="+jenis+"&lat="+userLat+"&lng="+userLng;
     const r=await fetch(url);const d=await r.json();
-    const nm=d.nama||userName,bg=d.bagian?"("+d.bagian+")":"";
-    if(d.status==="tidak_terdaftar") showRes("❌ Gmail tidak terdaftar","err");
-    else if(d.status==="diluar_lokasi") showRes("❌ Di luar area absen\n"+d.jarak+"m dari lokasi (maks "+d.radius+"m)","err");
-    else if(d.status==="gps_diperlukan") showRes("❌ GPS diperlukan\nIzinkan akses lokasi","err");
-    else if(d.status==="ok"&&tipe==="datang") showRes("✅ "+nm+" "+bg+"\nJam datang: "+d.jam,"ok");
-    else if(d.status==="ok"&&tipe==="pulang") showRes("🏁 "+nm+" "+bg+"\nJam pulang: "+d.jam+"\nDurasi: "+d.durasi,"ok");
-    else if(d.status==="sudah") showRes("⚠️ "+nm+" sudah absen datang\njam "+d.jam,"warn");
-    else if(d.status==="belum_datang") showRes("❌ "+nm+"\nBelum absen datang hari ini","err");
+    if(d.status==="ok"&&jenis==="datang") showRes("✅ "+d.nama+"\nJam datang: "+d.jam,"ok");
+    else if(d.status==="ok"&&jenis==="pulang") showRes("🏁 "+d.nama+"\nJam pulang: "+d.jam,"ok");
+    else showRes("❌ "+(d.message||"Gagal absen"),"err");
   }catch(e){showRes("Gagal terhubung ke server","err");}
   document.querySelector(".card").classList.remove("loading");
 }
-
 function showRes(msg,type){const el=document.getElementById("result");el.textContent=msg;el.className="result "+type;el.style.display="block";}
 
-function bukaAdmin(){document.getElementById("inp-pw").value="";document.getElementById("pw-err").style.display="none";document.getElementById("modal-pw").classList.add("show");setTimeout(()=>document.getElementById("inp-pw").focus(),200);}
-function cekPw(){
-  if(document.getElementById("inp-pw").value===ADMIN_PW){tutupModal("modal-pw");document.getElementById("page-absen").style.display="none";document.getElementById("page-admin").style.display="block";renderTabel();loadSettingKeAdmin();}
-  else{document.getElementById("pw-err").style.display="block";document.getElementById("inp-pw").value="";}
+// ---- admin lokasi ----
+function bukaAdmin(){
+  if(!lokasi){alert("Tunggu lokasi terverifikasi dulu (butuh GPS)");return;}
+  document.getElementById("inp-pw").value="";document.getElementById("pw-err").style.display="none";
+  document.getElementById("modal-pw").classList.add("show");
+  setTimeout(()=>document.getElementById("inp-pw").focus(),200);
+}
+async function cekPw(){
+  const pw=document.getElementById("inp-pw").value;
+  try{
+    const r=await fetch(SCRIPT_URL+"?action=verifAdminLokasi&sheetId="+lokasi.SheetID+"&pw="+encodeURIComponent(pw));
+    const d=await r.json();
+    if(d.status==="ok"){
+      adminNamaLokasi=d.namaLokasi;
+      tutupModal("modal-pw");
+      document.getElementById("page-absen").style.display="none";
+      document.getElementById("page-admin").style.display="block";
+      document.getElementById("admin-sub").textContent=adminNamaLokasi;
+      document.getElementById("info-nama").textContent=lokasi.NamaLokasi;
+      document.getElementById("info-koor").textContent=parseFloat(lokasi.Lat).toFixed(6)+", "+parseFloat(lokasi.Lng).toFixed(6);
+      document.getElementById("info-radius").textContent=lokasi.Radius+" meter";
+      document.getElementById("info-status").textContent=lokasi.Status;
+      loadKaryawan();
+    } else {
+      document.getElementById("pw-err").textContent=d.message||"Password salah";
+      document.getElementById("pw-err").style.display="block";
+      document.getElementById("inp-pw").value="";
+    }
+  }catch(e){ document.getElementById("pw-err").textContent="Gagal terhubung ke server"; document.getElementById("pw-err").style.display="block"; }
 }
 function keluarAdmin(){document.getElementById("page-admin").style.display="none";document.getElementById("page-absen").style.display="flex";}
 function tutupModal(id){document.getElementById(id).classList.remove("show");}
-function switchTab(name){["monitor","karyawan","gps","setting"].forEach((n,i)=>{document.querySelectorAll(".tab")[i].classList.toggle("active",n===name);document.getElementById("tab-"+n).classList.toggle("active",n===name);});}
-
-async function loadSettingKeAdmin(){
-  try{const r=await fetch(SCRIPT_URL+"?action=getSetting");const d=await r.json();
-    if(d.status==="ok"){settingGPS=d.setting;const lat=d.setting.lat,lng=d.setting.lng,radius=d.setting.radius||"25",aktif=d.setting.gps_aktif!=="false";
-      document.getElementById("gps-toggle").checked=aktif;document.getElementById("gps-radius").value=radius;document.getElementById("radius-val2").textContent=radius;updateGPSStatusBox(aktif);
-      if(lat&&lng&&lat!=="0"){document.getElementById("cur-coords").textContent=parseFloat(lat).toFixed(6)+", "+parseFloat(lng).toFixed(6);document.getElementById("cur-radius-txt").textContent=radius+" meter";tampilPeta(parseFloat(lat),parseFloat(lng));}
-    }
-  }catch(e){}
+function switchTab(name){["monitor","karyawan","info","setting"].forEach((n,i)=>{document.querySelectorAll(".tab")[i].classList.toggle("active",n===name);document.getElementById("tab-"+n).classList.toggle("active",n===name);});
+  if(name==="monitor") loadAbsensi();
 }
 
-function tampilPeta(lat,lng){
-  const f=document.getElementById("map-frame");
-  f.src="https://www.openstreetmap.org/export/embed.html?bbox="+(lng-0.001)+"%2C"+(lat-0.001)+"%2C"+(lng+0.001)+"%2C"+(lat+0.001)+"&layer=mapnik&marker="+lat+"%2C"+lng;
-  document.getElementById("map-wrap").style.display="block";
+// ---- karyawan CRUD (server-backed, per sheetId) ----
+async function loadKaryawan(){
+  document.getElementById("tbl-wrap").innerHTML='<div class="empty">⏳ Memuat...</div>';
+  try{const r=await fetch(SCRIPT_URL+"?action=listKaryawan&sheetId="+lokasi.SheetID);const d=await r.json();karyawan=d.data||[];renderTabel();}
+  catch(e){document.getElementById("tbl-wrap").innerHTML='<div class="empty">❌ Gagal memuat</div>';}
+}
+async function tambah(){
+  const nama=document.getElementById("inp-nama").value.trim(),email=document.getElementById("inp-email").value.trim().toLowerCase(),bagian=document.getElementById("inp-bagian").value.trim();
+  if(!nama){showAlert("a-form","Nama tidak boleh kosong","error");return;}
+  if(!email||!email.includes("@")){showAlert("a-form","Email tidak valid","error");return;}
+  try{
+    const r=await fetch(SCRIPT_URL+"?action=addKaryawan&sheetId="+lokasi.SheetID+"&nama="+encodeURIComponent(nama)+"&email="+encodeURIComponent(email)+"&bagian="+encodeURIComponent(bagian));
+    const d=await r.json();
+    if(d.status==="ok"){resetForm();showAlert("a-form","✅ "+nama+" berhasil ditambahkan","success");loadKaryawan();}
+    else showAlert("a-form",d.message||"Gagal menambahkan","error");
+  }catch(e){showAlert("a-form","Gagal terhubung ke server","error");}
+}
+function resetForm(){["inp-nama","inp-email","inp-bagian"].forEach(id=>document.getElementById(id).value="");}
+function renderTabel(){
+  const cari=(document.getElementById("cari-k")||{value:""}).value.toLowerCase();
+  const f=karyawan.filter(k=>(k.Nama||"").toLowerCase().includes(cari)||(k.Email||"").includes(cari)||(k.Bagian||"").toLowerCase().includes(cari));
+  document.getElementById("jml-badge").textContent=karyawan.length+" orang";
+  const wrap=document.getElementById("tbl-wrap");
+  if(!karyawan.length){wrap.innerHTML='<div class="empty">Belum ada karyawan</div>';return;}
+  if(!f.length){wrap.innerHTML='<div class="empty">Tidak ditemukan</div>';return;}
+  let html='<table><thead><tr><th>#</th><th>Nama</th><th>Email</th><th>Bagian</th><th>Aksi</th></tr></thead><tbody>';
+  f.forEach((k,i)=>{html+=`<tr><td style="color:#aaa">${i+1}</td><td><strong>${k.Nama}</strong></td><td style="font-size:11px">${k.Email||"—"}</td><td><span class="bchip">${k.Bagian||"—"}</span></td><td><div style="display:flex;gap:4px"><button class="abtn edit" onclick="bukaEdit('${k.Email}')">✏️</button><button class="abtn del" onclick="hapus('${k.Email}')">🗑️</button></div></td></tr>`;});
+  wrap.innerHTML=html+'</tbody></table>';
+}
+async function hapus(email){
+  if(!confirm("Hapus karyawan ini?"))return;
+  try{await fetch(SCRIPT_URL+"?action=deleteKaryawan&sheetId="+lokasi.SheetID+"&email="+encodeURIComponent(email));loadKaryawan();}catch(e){alert("Gagal menghapus");}
+}
+function bukaEdit(email){
+  const k=karyawan.find(x=>x.Email===email);if(!k)return;
+  document.getElementById("edit-nama").value=k.Nama;
+  document.getElementById("edit-email").value=k.Email;
+  document.getElementById("edit-bagian").value=k.Bagian||"";
+  document.getElementById("edit-oldemail").value=k.Email;
+  document.getElementById("modal-edit").classList.add("show");
+}
+async function simpanEdit(){
+  const oldEmail=document.getElementById("edit-oldemail").value,nama=document.getElementById("edit-nama").value.trim(),email=document.getElementById("edit-email").value.trim().toLowerCase(),bagian=document.getElementById("edit-bagian").value.trim();
+  if(!nama||!email){alert("Data tidak boleh kosong");return;}
+  try{
+    const r=await fetch(SCRIPT_URL+"?action=editKaryawan&sheetId="+lokasi.SheetID+"&oldEmail="+encodeURIComponent(oldEmail)+"&nama="+encodeURIComponent(nama)+"&email="+encodeURIComponent(email)+"&bagian="+encodeURIComponent(bagian));
+    const d=await r.json();
+    if(d.status==="ok"){tutupModal("modal-edit");loadKaryawan();}else alert(d.message||"Gagal menyimpan");
+  }catch(e){alert("Gagal terhubung ke server");}
 }
 
-function deteksiPosisiAdmin(){
-  const el=document.getElementById("admin-gps-status");el.style.display="block";el.className="ugps loading";el.textContent="📡 Mendeteksi posisi...";
-  if(!navigator.geolocation){el.className="ugps err";el.textContent="❌ GPS tidak didukung";return;}
-  navigator.geolocation.getCurrentPosition(pos=>{
-    adminLat=pos.coords.latitude;adminLng=pos.coords.longitude;
-    el.className="ugps ok";el.textContent="✅ Posisi: "+adminLat.toFixed(6)+", "+adminLng.toFixed(6)+" (~"+Math.round(pos.coords.accuracy)+"m)";
-    tampilPeta(adminLat,adminLng);document.getElementById("simpan-area").style.display="block";
-  },()=>{el.className="ugps err";el.textContent="❌ Gagal. Izinkan akses GPS";},{enableHighAccuracy:true,timeout:15000,maximumAge:0});
-}
-
-function toggleGPS(el){
-  updateGPSStatusBox(el.checked);gpsAktif=el.checked;
-  const lat=settingGPS.lat||"0",lng=settingGPS.lng||"0",radius=document.getElementById("gps-radius").value||"25";
-  fetch(SCRIPT_URL+"?action=saveSetting&lat="+lat+"&lng="+lng+"&radius="+radius+"&gps_aktif="+el.checked);
-}
-
-function updateGPSStatusBox(aktif){
-  const box=document.getElementById("gps-status-box");
-  box.className="gps-status-box "+(aktif?"active":"inactive");
-  box.textContent=aktif?"✅ Validasi GPS aktif — karyawan harus berada di lokasi":"❌ Validasi GPS nonaktif — absen dari mana saja";
-}
-
-async function simpanGPS(){
-  if(!adminLat||!adminLng){showAlert("a-gps","Deteksi posisi dulu","error");return;}
-  const radius=document.getElementById("gps-radius").value,aktif=document.getElementById("gps-toggle").checked;
-  try{const r=await fetch(SCRIPT_URL+"?action=saveSetting&lat="+adminLat+"&lng="+adminLng+"&radius="+radius+"&gps_aktif="+aktif);const d=await r.json();
-    if(d.status==="ok"){settingGPS={lat:adminLat.toString(),lng:adminLng.toString(),radius,gps_aktif:aktif.toString()};document.getElementById("cur-coords").textContent=adminLat.toFixed(6)+", "+adminLng.toFixed(6);document.getElementById("cur-radius-txt").textContent=radius+" meter";showAlert("a-gps","✅ Lokasi tersimpan! Radius: "+radius+"m","success");}
-  }catch(e){showAlert("a-gps","Gagal menyimpan","error");}
-}
-
+// ---- monitor absensi ----
 async function loadAbsensi(){
   document.getElementById("mon-wrap").innerHTML='<div class="empty">⏳ Memuat...</div>';
-  try{const r=await fetch(SCRIPT_URL+"?action=getAbsensi");const d=await r.json();absensiData=d.data||[];hitungStat();renderMonitor();}
-  catch(e){document.getElementById("mon-wrap").innerHTML='<div class="empty">❌ Gagal memuat</div>';}
+  try{
+    const [ra,rk]=await Promise.all([
+      fetch(SCRIPT_URL+"?action=getAbsensi&sheetId="+lokasi.SheetID),
+      fetch(SCRIPT_URL+"?action=listKaryawan&sheetId="+lokasi.SheetID)
+    ]);
+    const da=await ra.json(),dk=await rk.json();
+    absensiData=da.data||[];karyawan=dk.data||[];
+    hitungStat();renderMonitor();
+  }catch(e){document.getElementById("mon-wrap").innerHTML='<div class="empty">❌ Gagal memuat</div>';}
 }
 function hitungStat(){
-  const today=nowD.getDate().toString().padStart(2,"0")+"/"+(nowD.getMonth()+1).toString().padStart(2,"0")+"/"+nowD.getFullYear();
-  document.getElementById("s-datang").textContent=absensiData.filter(a=>a.tgl===today&&a.jamDatang).length;
-  document.getElementById("s-pulang").textContent=absensiData.filter(a=>a.tgl===today&&a.jamPulang).length;
-  document.getElementById("s-belum").textContent=Math.max(0,karyawan.length-absensiData.filter(a=>a.tgl===today&&a.jamDatang).length);
+  const n=new Date();
+  const today=n.getDate().toString().padStart(2,"0")+"/"+(n.getMonth()+1).toString().padStart(2,"0")+"/"+n.getFullYear();
+  document.getElementById("s-datang").textContent=absensiData.filter(a=>a.Tanggal===today&&a.JamDatang).length;
+  document.getElementById("s-pulang").textContent=absensiData.filter(a=>a.Tanggal===today&&a.JamPulang).length;
+  document.getElementById("s-belum").textContent=Math.max(0,karyawan.length-absensiData.filter(a=>a.Tanggal===today&&a.JamDatang).length);
 }
 function filterM(type,el){filterAktif=type;document.querySelectorAll(".ftab").forEach(t=>t.classList.remove("active"));el.classList.add("active");renderMonitor();}
 function renderMonitor(){
-  const today=nowD.getDate().toString().padStart(2,"0")+"/"+(nowD.getMonth()+1).toString().padStart(2,"0")+"/"+nowD.getFullYear();
+  const n=new Date();
+  const today=n.getDate().toString().padStart(2,"0")+"/"+(n.getMonth()+1).toString().padStart(2,"0")+"/"+n.getFullYear();
   const cari=(document.getElementById("cari-mon").value||"").toLowerCase();
-  const map={};absensiData.filter(a=>a.tgl===today).forEach(a=>{map[(a.email||"").toLowerCase()]={nama:a.nama,bagian:a.bagian||"",jamDatang:a.jamDatang,jamPulang:a.jamPulang};});
-  let list=karyawan.map(k=>{const ab=map[(k.email||"").toLowerCase()];return{nama:k.nama,email:k.email||"",bagian:k.bagian||"",jamDatang:ab?ab.jamDatang:"",jamPulang:ab?ab.jamPulang:"",status:ab?(ab.jamPulang?"pulang":"datang"):"belum"};});
+  const map={};absensiData.filter(a=>a.Tanggal===today).forEach(a=>{map[(a.Email||"").toLowerCase()]={jamDatang:a.JamDatang,jamPulang:a.JamPulang};});
+  let list=karyawan.map(k=>{const ab=map[(k.Email||"").toLowerCase()];return{nama:k.Nama,email:k.Email||"",bagian:k.Bagian||"",jamDatang:ab?ab.jamDatang:"",jamPulang:ab?ab.jamPulang:"",status:ab?(ab.jamPulang?"pulang":"datang"):"belum"};});
   if(filterAktif!=="all") list=list.filter(l=>l.status===filterAktif);
   if(cari) list=list.filter(l=>l.nama.toLowerCase().includes(cari)||(l.bagian||"").toLowerCase().includes(cari));
   list.sort((a,b)=>({datang:0,pulang:1,belum:2}[a.status]-{datang:0,pulang:1,belum:2}[b.status]));
@@ -579,45 +519,17 @@ function renderMonitor(){
   document.getElementById("mon-wrap").innerHTML=html+'</tbody></table>';
 }
 
-function tambah(){
-  const nama=document.getElementById("inp-nama").value.trim(),email=document.getElementById("inp-email").value.trim().toLowerCase(),bagian=document.getElementById("inp-bagian").value.trim();
-  if(!nama){showAlert("a-form","Nama tidak boleh kosong","error");return;}
-  if(!email||!email.includes("@")){showAlert("a-form","Gmail tidak valid","error");return;}
-  if(karyawan.find(k=>k.email===email)){showAlert("a-form","Gmail sudah terdaftar!","error");return;}
-  karyawan.push({nama,email,bagian});localStorage.setItem("karyawan_sppg",JSON.stringify(karyawan));renderTabel();resetForm();
-  showAlert("a-form","✅ "+nama+" berhasil ditambahkan","success");
-}
-function resetForm(){["inp-nama","inp-email","inp-bagian"].forEach(id=>document.getElementById(id).value="");}
-function renderTabel(){
-  const cari=(document.getElementById("cari-k")||{value:""}).value.toLowerCase();
-  const f=karyawan.filter(k=>k.nama.toLowerCase().includes(cari)||(k.email||"").includes(cari)||(k.bagian||"").toLowerCase().includes(cari));
-  document.getElementById("jml-badge").textContent=karyawan.length+" orang";
-  const wrap=document.getElementById("tbl-wrap");
-  if(!karyawan.length){wrap.innerHTML='<div class="empty">Belum ada karyawan</div>';return;}
-  if(!f.length){wrap.innerHTML='<div class="empty">Tidak ditemukan</div>';return;}
-  let html='<table><thead><tr><th>#</th><th>Nama</th><th>Gmail</th><th>Bagian</th><th>Aksi</th></tr></thead><tbody>';
-  f.forEach((k,i)=>{const ri=karyawan.indexOf(k);html+=`<tr><td style="color:#aaa">${i+1}</td><td><strong>${k.nama}</strong></td><td style="font-size:11px">${k.email||"—"}</td><td><span class="bchip">${k.bagian||"—"}</span></td><td><div style="display:flex;gap:4px"><button class="abtn edit" onclick="bukaEdit(${ri})">✏️</button><button class="abtn del" onclick="hapus(${ri})">🗑️</button></div></td></tr>`;});
-  wrap.innerHTML=html+'</tbody></table>';
-}
-function hapus(idx){if(!confirm("Hapus "+karyawan[idx].nama+"?"))return;karyawan.splice(idx,1);localStorage.setItem("karyawan_sppg",JSON.stringify(karyawan));renderTabel();}
-function bukaEdit(idx){document.getElementById("edit-nama").value=karyawan[idx].nama;document.getElementById("edit-email").value=karyawan[idx].email||"";document.getElementById("edit-bagian").value=karyawan[idx].bagian||"";document.getElementById("edit-idx").value=idx;document.getElementById("modal-edit").classList.add("show");}
-function simpanEdit(){
-  const idx=parseInt(document.getElementById("edit-idx").value),nama=document.getElementById("edit-nama").value.trim(),email=document.getElementById("edit-email").value.trim().toLowerCase(),bagian=document.getElementById("edit-bagian").value.trim();
-  if(!nama||!email){alert("Data tidak boleh kosong");return;}
-  karyawan[idx]={nama,email,bagian};localStorage.setItem("karyawan_sppg",JSON.stringify(karyawan));renderTabel();tutupModal("modal-edit");
-}
-function exportCSV(){
-  if(!karyawan.length){alert("Belum ada data");return;}
-  let csv="Nama,Gmail,Bagian\n";karyawan.forEach(k=>csv+=k.nama+","+(k.email||"")+","+(k.bagian||"")+"\n");
-  const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));a.download="karyawan_sppg.csv";a.click();
-}
-function gantiPw(){
-  const baru=document.getElementById("pw-baru").value,konfirm=document.getElementById("pw-konfirm").value;
-  if(baru.length<4){showAlert("a-pw","Minimal 4 karakter","error");return;}
-  if(baru!==konfirm){showAlert("a-pw","Password tidak cocok","error");return;}
-  ADMIN_PW=baru;localStorage.setItem("admin_pw_sppg",baru);
-  document.getElementById("pw-baru").value="";document.getElementById("pw-konfirm").value="";
-  showAlert("a-pw","✅ Password berhasil diganti","success");
+// ---- ganti password admin ----
+async function gantiPw(){
+  const lama=document.getElementById("pw-lama").value,baru=document.getElementById("pw-baru").value,konfirm=document.getElementById("pw-konfirm").value;
+  if(baru.length<4){showAlert("a-pw","Password baru minimal 4 karakter","error");return;}
+  if(baru!==konfirm){showAlert("a-pw","Konfirmasi password tidak cocok","error");return;}
+  try{
+    const r=await fetch(SCRIPT_URL+"?action=gantiPasswordAdmin&sheetId="+lokasi.SheetID+"&oldPw="+encodeURIComponent(lama)+"&newPw="+encodeURIComponent(baru));
+    const d=await r.json();
+    if(d.status==="ok"){["pw-lama","pw-baru","pw-konfirm"].forEach(id=>document.getElementById(id).value="");showAlert("a-pw","✅ Password berhasil diganti","success");}
+    else showAlert("a-pw",d.message||"Gagal mengganti password","error");
+  }catch(e){showAlert("a-pw","Gagal terhubung ke server","error");}
 }
 function showAlert(id,msg,type){const el=document.getElementById(id);el.textContent=msg;el.className="aalert "+type;el.style.display="block";setTimeout(()=>el.style.display="none",4000);}
 </script>

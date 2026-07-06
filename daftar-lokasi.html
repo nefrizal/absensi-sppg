@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<meta name="theme-color" content="#1D9E75">
+<title>Daftar Lokasi Baru</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:sans-serif;background:#f5f5f5;min-height:100vh;display:flex;justify-content:center;align-items:flex-start;padding:24px 16px}
+.card{background:#fff;border-radius:16px;padding:26px 22px;max-width:400px;width:100%;box-shadow:0 2px 12px rgba(0,0,0,.08)}
+.logo{width:52px;height:52px;background:#E1F5EE;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:26px}
+h1{text-align:center;font-size:17px;margin-bottom:4px}
+.sub{text-align:center;color:#888;font-size:12px;margin-bottom:20px}
+label{font-size:12px;color:#666;display:block;margin-bottom:5px;margin-top:12px}
+input{width:100%;padding:11px 14px;border:1.5px solid #ddd;border-radius:10px;font-size:14px;outline:none}
+input:focus{border-color:#1D9E75}
+.hint{font-size:11px;color:#aaa;margin-top:4px}
+.gps-box{border-radius:10px;padding:10px 12px;margin-top:10px;font-size:12px;text-align:center;display:none}
+.gps-box.ok{background:#E1F5EE;color:#085041;display:block}
+.gps-box.err{background:#FCEBEB;color:#A32D2D;display:block}
+.gps-box.loading{background:#FAEEDA;color:#854F0B;display:block}
+.btn-gps{width:100%;padding:11px;background:#378ADD;color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;margin-top:10px}
+.radius-label{display:flex;justify-content:space-between;font-size:12px;color:#666;margin-top:12px;margin-bottom:4px}
+.btn-submit{width:100%;padding:13px;background:#1D9E75;color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;margin-top:20px}
+.btn-submit:disabled{opacity:.5}
+.result{margin-top:16px;padding:12px 16px;border-radius:10px;font-size:13px;text-align:center;display:none;line-height:1.6;white-space:pre-line}
+.result.ok{background:#E1F5EE;color:#085041;display:block}
+.result.err{background:#FCEBEB;color:#A32D2D;display:block}
+.back{display:block;text-align:center;margin-top:16px;font-size:12px;color:#aaa;text-decoration:none}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="logo">📍</div>
+  <h1>Daftar Lokasi Baru</h1>
+  <div class="sub">Isi data di bawah, lokasi akan aktif setelah disetujui super admin</div>
+
+  <label>Nama Admin Lokasi</label>
+  <input type="text" id="namaAdmin" placeholder="Nama lengkap kamu">
+
+  <label>Nomor HP / WhatsApp</label>
+  <input type="text" id="nomorHp" placeholder="08xxxxxxxxxx">
+
+  <label>Nama Lokasi</label>
+  <input type="text" id="namaLokasi" placeholder="Contoh: SPPG Bagan, Dapur Medan">
+
+  <label>Titik GPS Lokasi</label>
+  <button class="btn-gps" onclick="deteksiGPS()">📡 Deteksi Posisi Saya Sekarang</button>
+  <div class="gps-box" id="gps-box"></div>
+
+  <div class="radius-label"><span>Radius absen</span><strong id="radius-val">25 meter</strong></div>
+  <input type="range" id="radius" min="10" max="200" value="25" oninput="document.getElementById('radius-val').textContent=this.value+' meter'">
+
+  <label>Link Google Sheet (kosong)</label>
+  <input type="text" id="sheetUrl" placeholder="https://docs.google.com/spreadsheets/d/...">
+  <div class="hint">Buat 1 Google Sheet baru khusus, kosongkan isinya, lalu share dengan akses "Siapa saja yang punya link → Editor". Tempel link-nya di sini.</div>
+
+  <label>Password Panel Admin</label>
+  <input type="password" id="adminPw" placeholder="Untuk login ke panel admin lokasi kamu nanti">
+
+  <button class="btn-submit" id="btn-submit" onclick="daftar()">Kirim Pendaftaran</button>
+  <div class="result" id="result"></div>
+  <a class="back" href="index.html">← Kembali ke halaman absensi</a>
+</div>
+
+<script>
+const SCRIPT_URL = "GANTI_DENGAN_URL_APPS_SCRIPT_MASTER";
+let gpsLat=null, gpsLng=null;
+
+function deteksiGPS(){
+  const box=document.getElementById("gps-box");
+  box.className="gps-box loading";box.textContent="📡 Mendeteksi posisi...";
+  if(!navigator.geolocation){box.className="gps-box err";box.textContent="❌ GPS tidak didukung";return;}
+  navigator.geolocation.getCurrentPosition(pos=>{
+    gpsLat=pos.coords.latitude;gpsLng=pos.coords.longitude;
+    box.className="gps-box ok";
+    box.textContent="✅ Posisi: "+gpsLat.toFixed(6)+", "+gpsLng.toFixed(6)+" (~"+Math.round(pos.coords.accuracy)+"m)";
+  },()=>{box.className="gps-box err";box.textContent="❌ Gagal deteksi. Izinkan akses GPS.";},{enableHighAccuracy:true,timeout:15000,maximumAge:0});
+}
+
+async function daftar(){
+  const namaAdmin=document.getElementById("namaAdmin").value.trim();
+  const nomorHp=document.getElementById("nomorHp").value.trim();
+  const namaLokasi=document.getElementById("namaLokasi").value.trim();
+  const radius=document.getElementById("radius").value;
+  const sheetUrl=document.getElementById("sheetUrl").value.trim();
+  const adminPw=document.getElementById("adminPw").value;
+  const result=document.getElementById("result");
+
+  if(!namaAdmin||!nomorHp||!namaLokasi){showResult("Lengkapi nama, no HP, dan nama lokasi","err");return;}
+  if(!gpsLat||!gpsLng){showResult("Deteksi posisi GPS dulu","err");return;}
+  if(!sheetUrl.includes("docs.google.com")){showResult("Link Google Sheet tidak valid","err");return;}
+  if(!adminPw||adminPw.length<4){showResult("Password admin minimal 4 karakter","err");return;}
+
+  document.getElementById("btn-submit").disabled=true;
+  showResult("⏳ Mengirim pendaftaran...","ok");
+  try{
+    const url=SCRIPT_URL+"?action=registerLokasi"
+      +"&namaAdmin="+encodeURIComponent(namaAdmin)
+      +"&nomorHp="+encodeURIComponent(nomorHp)
+      +"&namaLokasi="+encodeURIComponent(namaLokasi)
+      +"&lat="+gpsLat+"&lng="+gpsLng+"&radius="+radius
+      +"&sheetUrl="+encodeURIComponent(sheetUrl)
+      +"&adminPw="+encodeURIComponent(adminPw);
+    const r=await fetch(url);const d=await r.json();
+    if(d.status==="ok") showResult("✅ Pendaftaran terkirim!\nMenunggu approval super admin. Kamu akan bisa pakai aplikasi setelah disetujui.","ok");
+    else showResult("❌ "+(d.message||"Gagal mendaftar"),"err");
+  }catch(e){showResult("Gagal terhubung ke server","err");}
+  document.getElementById("btn-submit").disabled=false;
+}
+function showResult(msg,type){const el=document.getElementById("result");el.textContent=msg;el.className="result "+type;}
+</script>
+</body>
+</html>

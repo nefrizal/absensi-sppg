@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<meta name="theme-color" content="#0F6E56">
+<title>Super Admin - Absensi Multi Lokasi</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:sans-serif;background:#f5f5f5;min-height:100vh}
+.header{background:linear-gradient(135deg,#1D9E75,#0F6E56);color:#fff;padding:18px 16px;position:sticky;top:0;z-index:10}
+.header h1{font-size:16px}
+.header p{font-size:11px;opacity:.85;margin-top:2px}
+.wrap{max-width:640px;margin:0 auto;padding:16px}
+.login-card{background:#fff;border-radius:16px;padding:26px 22px;max-width:340px;margin:60px auto;box-shadow:0 2px 12px rgba(0,0,0,.08)}
+.login-card h2{text-align:center;font-size:16px;margin-bottom:16px}
+.login-card input{width:100%;padding:11px 14px;border:1.5px solid #ddd;border-radius:10px;font-size:14px;margin-bottom:10px;outline:none}
+.login-card button{width:100%;padding:12px;background:#1D9E75;color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer}
+.login-err{color:#E24B4A;font-size:12px;text-align:center;margin-bottom:8px;display:none}
+.tabs{display:flex;gap:6px;margin-bottom:14px;overflow-x:auto}
+.tab{padding:7px 14px;border-radius:20px;font-size:12px;cursor:pointer;border:1.5px solid #ddd;background:#fff;color:#555;font-weight:500;white-space:nowrap}
+.tab.active{background:#1D9E75;color:#fff;border-color:#1D9E75}
+.card{background:#fff;border-radius:14px;padding:16px;margin-bottom:12px;box-shadow:0 1px 6px rgba(0,0,0,.07)}
+.card-title{font-size:15px;font-weight:700;margin-bottom:2px}
+.card-sub{font-size:11px;color:#888;margin-bottom:10px}
+.info-line{display:flex;justify-content:space-between;font-size:12px;padding:5px 0;border-bottom:1px solid #f2f2f2}
+.info-line:last-child{border-bottom:none}
+.info-line b{color:#333;text-align:right}
+.badge{display:inline-flex;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600}
+.badge.Pending{background:#FAEEDA;color:#854F0B}
+.badge.Approved{background:#E1F5EE;color:#085041}
+.badge.Rejected{background:#FCEBEB;color:#A32D2D}
+.badge.Suspended{background:#F0E6FA;color:#5B2D91}
+.btns{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.btn{flex:1;padding:9px;border:none;border-radius:10px;font-size:12px;font-weight:600;cursor:pointer;min-width:100px}
+.btn.approve{background:#1D9E75;color:#fff}
+.btn.reject{background:#FCEBEB;color:#A32D2D}
+.btn.suspend{background:#F0E6FA;color:#5B2D91}
+.btn.reaktif{background:#E1F5EE;color:#085041}
+.empty{text-align:center;padding:30px;color:#aaa;font-size:13px}
+.refresh{background:none;border:none;color:#fff;font-size:12px;cursor:pointer;text-decoration:underline;margin-top:6px}
+</style>
+</head>
+<body>
+
+<div id="login-page">
+  <div class="login-card">
+    <h2>🔐 Login Super Admin</h2>
+    <div class="login-err" id="login-err">Password salah</div>
+    <input type="password" id="inp-pass" placeholder="Password super admin" onkeydown="if(event.key==='Enter')login()">
+    <button onclick="login()">Masuk</button>
+  </div>
+</div>
+
+<div id="dash-page" style="display:none">
+  <div class="header">
+    <h1>📍 Super Admin — Absensi Multi Lokasi</h1>
+    <p>Kelola aktivasi lokasi</p>
+    <button class="refresh" onclick="loadAll()">🔄 Refresh</button>
+  </div>
+  <div class="wrap">
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('Pending',this)">⏳ Pending</button>
+      <button class="tab" onclick="switchTab('Approved',this)">✅ Aktif</button>
+      <button class="tab" onclick="switchTab('Suspended',this)">⛔ Suspended</button>
+      <button class="tab" onclick="switchTab('Rejected',this)">❌ Ditolak</button>
+    </div>
+    <div id="list-wrap"><div class="empty">⏳ Memuat...</div></div>
+  </div>
+</div>
+
+<script>
+const SCRIPT_URL = "GANTI_DENGAN_URL_APPS_SCRIPT_MASTER";
+let SUPER_PASS = "";
+let allLokasi = [];
+let activeTab = "Pending";
+
+function login(){
+  const pw=document.getElementById("inp-pass").value;
+  SUPER_PASS=pw;
+  loadAll(true);
+}
+
+async function loadAll(isLogin){
+  try{
+    const r=await fetch(SCRIPT_URL+"?action=listLokasi&pass="+encodeURIComponent(SUPER_PASS));
+    const d=await r.json();
+    if(d.status!=="ok"){
+      if(isLogin){document.getElementById("login-err").style.display="block";}
+      return;
+    }
+    allLokasi=d.data||[];
+    document.getElementById("login-page").style.display="none";
+    document.getElementById("dash-page").style.display="block";
+    render();
+  }catch(e){
+    if(isLogin){document.getElementById("login-err").textContent="Gagal terhubung ke server";document.getElementById("login-err").style.display="block";}
+  }
+}
+
+function switchTab(status,el){
+  activeTab=status;
+  document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
+  el.classList.add("active");
+  render();
+}
+
+function render(){
+  const wrap=document.getElementById("list-wrap");
+  const list=allLokasi.filter(l=>l.Status===activeTab);
+  if(!list.length){wrap.innerHTML='<div class="empty">Tidak ada lokasi berstatus '+activeTab+'</div>';return;}
+  let html="";
+  list.forEach(l=>{
+    html+=`<div class="card">
+      <div class="card-title">${l.NamaLokasi} <span class="badge ${l.Status}">${l.Status}</span></div>
+      <div class="card-sub">Admin: ${l.NamaAdmin} • ${l.NomorHP}</div>
+      <div class="info-line"><span>Koordinat</span><b>${parseFloat(l.Lat).toFixed(6)}, ${parseFloat(l.Lng).toFixed(6)}</b></div>
+      <div class="info-line"><span>Radius</span><b>${l.Radius} meter</b></div>
+      <div class="info-line"><span>Sheet</span><b><a href="${l.SheetURL}" target="_blank">Buka Sheet</a></b></div>
+      <div class="info-line"><span>Terdaftar</span><b>${new Date(l.TanggalDaftar).toLocaleString('id-ID')}</b></div>
+      <div class="btns">${tombolAksi(l)}</div>
+    </div>`;
+  });
+  wrap.innerHTML=html;
+}
+
+function tombolAksi(l){
+  if(l.Status==="Pending"){
+    return `<button class="btn approve" onclick="aksi('approveLokasi','${l.ID}')">✅ Approve</button>
+            <button class="btn reject" onclick="aksi('rejectLokasi','${l.ID}')">❌ Tolak</button>`;
+  }
+  if(l.Status==="Approved"){
+    return `<button class="btn suspend" onclick="aksi('suspendLokasi','${l.ID}')">⛔ Hentikan Sementara</button>`;
+  }
+  if(l.Status==="Suspended"){
+    return `<button class="btn reaktif" onclick="aksi('reaktifkanLokasi','${l.ID}')">🔄 Aktifkan Kembali</button>`;
+  }
+  return "";
+}
+
+async function aksi(action,id){
+  if(!confirm("Yakin lanjutkan aksi ini?"))return;
+  try{
+    const r=await fetch(SCRIPT_URL+"?action="+action+"&id="+encodeURIComponent(id)+"&pass="+encodeURIComponent(SUPER_PASS));
+    const d=await r.json();
+    if(d.status==="ok") loadAll(); else alert(d.message||"Gagal");
+  }catch(e){alert("Gagal terhubung ke server");}
+}
+</script>
+</body>
+</html>

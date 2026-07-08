@@ -412,7 +412,7 @@ async function absen(jenis){
     const url=SCRIPT_URL+"?action=absen&sheetId="+lokasi.SheetID+"&email="+encodeURIComponent(userEmail)+"&jenis="+jenis+"&lat="+userLat+"&lng="+userLng;
     const d=await jsonp(url);
     if(d.status==="ok"&&jenis==="datang") showRes("✅ "+d.nama+"\nJam datang: "+d.jam,"ok");
-    else if(d.status==="ok"&&jenis==="pulang") showRes("🏁 "+d.nama+"\nJam pulang: "+d.jam,"ok");
+    else if(d.status==="ok"&&jenis==="pulang") showRes("🏁 "+d.nama+"\nJam pulang: "+d.jam+"\nLama kerja: "+(d.lamaKerja||"—"),"ok");
     else showRes("❌ "+(d.message||"Gagal absen"),"err");
   }catch(e){showRes("Gagal terhubung ke server","err");}
   document.querySelector(".card").classList.remove("loading");
@@ -516,7 +516,7 @@ async function loadAbsensi(){
   }catch(e){document.getElementById("mon-wrap").innerHTML='<div class="empty">❌ Gagal memuat</div>';}
 }
 function hitungStat(){
-  const n=new Date();
+  const n=jamSekarang();
   const today=n.getDate().toString().padStart(2,"0")+"/"+(n.getMonth()+1).toString().padStart(2,"0")+"/"+n.getFullYear();
   document.getElementById("s-datang").textContent=absensiData.filter(a=>a.Tanggal===today&&a.JamDatang).length;
   document.getElementById("s-pulang").textContent=absensiData.filter(a=>a.Tanggal===today&&a.JamPulang).length;
@@ -524,17 +524,17 @@ function hitungStat(){
 }
 function filterM(type,el){filterAktif=type;document.querySelectorAll(".ftab").forEach(t=>t.classList.remove("active"));el.classList.add("active");renderMonitor();}
 function renderMonitor(){
-  const n=new Date();
+  const n=jamSekarang();
   const today=n.getDate().toString().padStart(2,"0")+"/"+(n.getMonth()+1).toString().padStart(2,"0")+"/"+n.getFullYear();
   const cari=(document.getElementById("cari-mon").value||"").toLowerCase();
-  const map={};absensiData.filter(a=>a.Tanggal===today).forEach(a=>{map[(a.Email||"").toLowerCase()]={jamDatang:a.JamDatang,jamPulang:a.JamPulang};});
-  let list=karyawan.map(k=>{const ab=map[(k.Email||"").toLowerCase()];return{nama:k.Nama,email:k.Email||"",bagian:k.Bagian||"",jamDatang:ab?ab.jamDatang:"",jamPulang:ab?ab.jamPulang:"",status:ab?(ab.jamPulang?"pulang":"datang"):"belum"};});
+  const map={};absensiData.filter(a=>a.Tanggal===today).forEach(a=>{map[(a.Email||"").toLowerCase()]={jamDatang:a.JamDatang,jamPulang:a.JamPulang,lamaKerja:a.LamaKerja};});
+  let list=karyawan.map(k=>{const ab=map[(k.Email||"").toLowerCase()];return{nama:k.Nama,email:k.Email||"",bagian:k.Bagian||"",jamDatang:ab?ab.jamDatang:"",jamPulang:ab?ab.jamPulang:"",lamaKerja:ab?ab.lamaKerja:"",status:ab?(ab.jamPulang?"pulang":"datang"):"belum"};});
   if(filterAktif!=="all") list=list.filter(l=>l.status===filterAktif);
   if(cari) list=list.filter(l=>l.nama.toLowerCase().includes(cari)||(l.bagian||"").toLowerCase().includes(cari));
   list.sort((a,b)=>({datang:0,pulang:1,belum:2}[a.status]-{datang:0,pulang:1,belum:2}[b.status]));
   if(!list.length){document.getElementById("mon-wrap").innerHTML='<div class="empty">Tidak ada data</div>';return;}
-  let html='<table><thead><tr><th>Nama</th><th>Bagian</th><th>Datang</th><th>Pulang</th><th></th></tr></thead><tbody>';
-  list.forEach(l=>{const chip=l.status==="datang"?'<span class="chip datang">✅</span>':l.status==="pulang"?'<span class="chip pulang">🏁</span>':'<span class="chip belum">❌</span>';html+=`<tr><td><strong>${l.nama}</strong><br><span style="font-size:10px;color:#aaa">${l.email}</span></td><td><span class="bchip">${l.bagian||"—"}</span></td><td style="font-size:11px;font-family:monospace">${l.jamDatang||"—"}</td><td style="font-size:11px;font-family:monospace">${l.jamPulang||"—"}</td><td>${chip}</td></tr>`;});
+  let html='<table><thead><tr><th>Nama</th><th>Bagian</th><th>Datang</th><th>Pulang</th><th>Lama Kerja</th><th></th></tr></thead><tbody>';
+  list.forEach(l=>{const chip=l.status==="datang"?'<span class="chip datang">✅</span>':l.status==="pulang"?'<span class="chip pulang">🏁</span>':'<span class="chip belum">❌</span>';html+=`<tr><td><strong>${l.nama}</strong><br><span style="font-size:10px;color:#aaa">${l.email}</span></td><td><span class="bchip">${l.bagian||"—"}</span></td><td style="font-size:11px;font-family:monospace">${l.jamDatang||"—"}</td><td style="font-size:11px;font-family:monospace">${l.jamPulang||"—"}</td><td style="font-size:11px">${l.lamaKerja||"—"}</td><td>${chip}</td></tr>`;});
   document.getElementById("mon-wrap").innerHTML=html+'</tbody></table>';
 }
 

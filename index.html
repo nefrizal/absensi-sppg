@@ -309,12 +309,23 @@ let karyawan = [], absensiData = [], filterAktif = "all";
 let adminNamaLokasi = "";
 
 const HARI=["Minggu","Senin","Selasa","Rabu","Kamis","Jumat","Sabtu"];
+let timeOffset = 0; // selisih jam server vs jam HP, di-update tiap respons dari server
+function jamSekarang(){ return new Date(Date.now()+timeOffset); }
 function updateClock(){
-  const n=new Date();
+  const n=jamSekarang();
   document.getElementById("tgl-hari").textContent=HARI[n.getDay()]+", "+n.getDate().toString().padStart(2,"0")+"/"+(n.getMonth()+1).toString().padStart(2,"0")+"/"+n.getFullYear();
   document.getElementById("jam-skrg").textContent=n.getHours().toString().padStart(2,"0")+":"+n.getMinutes().toString().padStart(2,"0");
 }
 updateClock(); setInterval(updateClock,30000);
+
+// Bungkus jsonp supaya setiap respons server otomatis menyinkronkan timeOffset,
+// jadi jam yang TAMPIL di layar HP selalu ikut jam server, bukan jam HP yang mungkin salah setting.
+const jsonpAsli = jsonp;
+jsonp = async function(url){
+  const d = await jsonpAsli(url);
+  if(d && d.serverTime){ timeOffset = d.serverTime - Date.now(); updateClock(); }
+  return d;
+};
 
 function hitungJarak(la1,lo1,la2,lo2){
   const R=6371000,dL=(la2-la1)*Math.PI/180,dO=(lo2-lo1)*Math.PI/180;

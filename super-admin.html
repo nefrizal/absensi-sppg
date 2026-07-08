@@ -71,6 +71,19 @@ body{font-family:sans-serif;background:#f5f5f5;min-height:100vh}
 
 <script>
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbznX4I5u1XxiXaNwmrVoVH1u2pVLDTGhoilKBbjl-1Yoa9Q_ZNIn12NxweHPUGObsMKqg/exec";
+
+// JSONP: menghindari error CORS dari Google Apps Script
+function jsonp(url){
+  return new Promise((resolve,reject)=>{
+    const cbName="cb_"+Date.now()+"_"+Math.floor(Math.random()*100000);
+    window[cbName]=function(data){ resolve(data); delete window[cbName]; script.remove(); };
+    const script=document.createElement("script");
+    script.src=url+(url.includes("?")?"&":"?")+"callback="+cbName;
+    script.onerror=()=>{ reject(new Error("Gagal memuat")); delete window[cbName]; script.remove(); };
+    document.body.appendChild(script);
+    setTimeout(()=>{ if(window[cbName]){ reject(new Error("Waktu habis")); delete window[cbName]; script.remove(); } },15000);
+  });
+}
 let SUPER_PASS = "";
 let allLokasi = [];
 let activeTab = "Pending";
@@ -83,8 +96,7 @@ function login(){
 
 async function loadAll(isLogin){
   try{
-    const r=await fetch(SCRIPT_URL+"?action=listLokasi&pass="+encodeURIComponent(SUPER_PASS));
-    const d=await r.json();
+    const d=await jsonp(SCRIPT_URL+"?action=listLokasi&pass="+encodeURIComponent(SUPER_PASS));
     if(d.status!=="ok"){
       if(isLogin){document.getElementById("login-err").style.display="block";}
       return;
@@ -141,8 +153,7 @@ function tombolAksi(l){
 async function aksi(action,id){
   if(!confirm("Yakin lanjutkan aksi ini?"))return;
   try{
-    const r=await fetch(SCRIPT_URL+"?action="+action+"&id="+encodeURIComponent(id)+"&pass="+encodeURIComponent(SUPER_PASS));
-    const d=await r.json();
+    const d=await jsonp(SCRIPT_URL+"?action="+action+"&id="+encodeURIComponent(id)+"&pass="+encodeURIComponent(SUPER_PASS));
     if(d.status==="ok") loadAll(); else alert(d.message||"Gagal");
   }catch(e){alert("Gagal terhubung ke server");}
 }

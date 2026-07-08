@@ -275,7 +275,20 @@ tr:last-child td{border-bottom:none}
 <script>
 // GANTI URL INI dengan Web App URL Apps Script Master Sheet
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbznX4I5u1XxiXaNwmrVoVH1u2pVLDTGhoilKBbjl-1Yoa9Q_ZNIn12NxweHPUGObsMKqg/exec";
-  
+
+// JSONP: menghindari error CORS dari Google Apps Script
+function jsonp(url){
+  return new Promise((resolve,reject)=>{
+    const cbName="cb_"+Date.now()+"_"+Math.floor(Math.random()*100000);
+    window[cbName]=function(data){ resolve(data); delete window[cbName]; script.remove(); };
+    const script=document.createElement("script");
+    script.src=url+(url.includes("?")?"&":"?")+"callback="+cbName;
+    script.onerror=()=>{ reject(new Error("Gagal memuat")); delete window[cbName]; script.remove(); };
+    document.body.appendChild(script);
+    setTimeout(()=>{ if(window[cbName]){ reject(new Error("Waktu habis")); delete window[cbName]; script.remove(); } },15000);
+  });
+}
+
 let deferredPrompt = null;
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(()=>{}));
@@ -317,8 +330,7 @@ function deteksiLokasi(){
   navigator.geolocation.getCurrentPosition(async pos=>{
     userLat=pos.coords.latitude;userLng=pos.coords.longitude;
     try{
-      const r=await fetch(SCRIPT_URL+"?action=findLokasiByGPS&lat="+userLat+"&lng="+userLng);
-      const d=await r.json();
+      const d=await jsonp(SCRIPT_URL+"?action=findLokasiByGPS&lat="+userLat+"&lng="+userLng);
       if(d.status==="ok"){
         lokasi=d.lokasi;
         document.getElementById("lokasi-label").textContent=lokasi.NamaLokasi;
@@ -340,7 +352,7 @@ function deteksiLokasi(){
 deteksiLokasi();
 
 async function autoRestore(email){
-  try{const r=await fetch(SCRIPT_URL+"?action=cek&sheetId="+lokasi.SheetID+"&email="+encodeURIComponent(email));const d=await r.json();
+  try{const d=await jsonp(SCRIPT_URL+"?action=cek&sheetId="+lokasi.SheetID+"&email="+encodeURIComponent(email));
     if(d.status==="ok"){userName=d.nama;userBagian=d.bagian;tampilUser(email,d.nama,d.bagian);}
     else{localStorage.removeItem("absen_email");userEmail="";}
   }catch(e){}
@@ -352,7 +364,7 @@ async function verif(){
   if(!email||!email.includes("@")){showRes("Masukkan email yang valid","err");return;}
   showRes("⏳ Memverifikasi...","warn");
   document.querySelector(".card").classList.add("loading");
-  try{const r=await fetch(SCRIPT_URL+"?action=cek&sheetId="+lokasi.SheetID+"&email="+encodeURIComponent(email));const d=await r.json();
+  try{const d=await jsonp(SCRIPT_URL+"?action=cek&sheetId="+lokasi.SheetID+"&email="+encodeURIComponent(email));
     if(d.status==="ok"){userEmail=email;userName=d.nama;userBagian=d.bagian;localStorage.setItem("absen_email",email);tampilUser(email,d.nama,d.bagian);document.getElementById("result").style.display="none";}
     else showRes("❌ Email tidak terdaftar di lokasi ini.\nHubungi admin lokasi.","err");
   }catch(e){showRes("Gagal terhubung ke server","err");}
@@ -387,7 +399,7 @@ async function absen(jenis){
   document.querySelector(".card").classList.add("loading");
   try{
     const url=SCRIPT_URL+"?action=absen&sheetId="+lokasi.SheetID+"&email="+encodeURIComponent(userEmail)+"&jenis="+jenis+"&lat="+userLat+"&lng="+userLng;
-    const r=await fetch(url);const d=await r.json();
+    const d=await jsonp(url);
     if(d.status==="ok"&&jenis==="datang") showRes("✅ "+d.nama+"\nJam datang: "+d.jam,"ok");
     else if(d.status==="ok"&&jenis==="pulang") showRes("🏁 "+d.nama+"\nJam pulang: "+d.jam,"ok");
     else showRes("❌ "+(d.message||"Gagal absen"),"err");
@@ -406,8 +418,7 @@ function bukaAdmin(){
 async function cekPw(){
   const pw=document.getElementById("inp-pw").value;
   try{
-    const r=await fetch(SCRIPT_URL+"?action=verifAdminLokasi&sheetId="+lokasi.SheetID+"&pw="+encodeURIComponent(pw));
-    const d=await r.json();
+    const d=await jsonp(SCRIPT_URL+"?action=verifAdminLokasi&sheetId="+lokasi.SheetID+"&pw="+encodeURIComponent(pw));
     if(d.status==="ok"){
       adminNamaLokasi=d.namaLokasi;
       tutupModal("modal-pw");
@@ -435,7 +446,7 @@ function switchTab(name){["monitor","karyawan","info","setting"].forEach((n,i)=>
 // ---- karyawan CRUD (server-backed, per sheetId) ----
 async function loadKaryawan(){
   document.getElementById("tbl-wrap").innerHTML='<div class="empty">⏳ Memuat...</div>';
-  try{const r=await fetch(SCRIPT_URL+"?action=listKaryawan&sheetId="+lokasi.SheetID);const d=await r.json();karyawan=d.data||[];renderTabel();}
+  try{const d=await jsonp(SCRIPT_URL+"?action=listKaryawan&sheetId="+lokasi.SheetID);karyawan=d.data||[];renderTabel();}
   catch(e){document.getElementById("tbl-wrap").innerHTML='<div class="empty">❌ Gagal memuat</div>';}
 }
 async function tambah(){
@@ -443,8 +454,7 @@ async function tambah(){
   if(!nama){showAlert("a-form","Nama tidak boleh kosong","error");return;}
   if(!email||!email.includes("@")){showAlert("a-form","Email tidak valid","error");return;}
   try{
-    const r=await fetch(SCRIPT_URL+"?action=addKaryawan&sheetId="+lokasi.SheetID+"&nama="+encodeURIComponent(nama)+"&email="+encodeURIComponent(email)+"&bagian="+encodeURIComponent(bagian));
-    const d=await r.json();
+    const d=await jsonp(SCRIPT_URL+"?action=addKaryawan&sheetId="+lokasi.SheetID+"&nama="+encodeURIComponent(nama)+"&email="+encodeURIComponent(email)+"&bagian="+encodeURIComponent(bagian));
     if(d.status==="ok"){resetForm();showAlert("a-form","✅ "+nama+" berhasil ditambahkan","success");loadKaryawan();}
     else showAlert("a-form",d.message||"Gagal menambahkan","error");
   }catch(e){showAlert("a-form","Gagal terhubung ke server","error");}
@@ -463,7 +473,7 @@ function renderTabel(){
 }
 async function hapus(email){
   if(!confirm("Hapus karyawan ini?"))return;
-  try{await fetch(SCRIPT_URL+"?action=deleteKaryawan&sheetId="+lokasi.SheetID+"&email="+encodeURIComponent(email));loadKaryawan();}catch(e){alert("Gagal menghapus");}
+  try{await jsonp(SCRIPT_URL+"?action=deleteKaryawan&sheetId="+lokasi.SheetID+"&email="+encodeURIComponent(email));loadKaryawan();}catch(e){alert("Gagal menghapus");}
 }
 function bukaEdit(email){
   const k=karyawan.find(x=>x.Email===email);if(!k)return;
@@ -477,8 +487,7 @@ async function simpanEdit(){
   const oldEmail=document.getElementById("edit-oldemail").value,nama=document.getElementById("edit-nama").value.trim(),email=document.getElementById("edit-email").value.trim().toLowerCase(),bagian=document.getElementById("edit-bagian").value.trim();
   if(!nama||!email){alert("Data tidak boleh kosong");return;}
   try{
-    const r=await fetch(SCRIPT_URL+"?action=editKaryawan&sheetId="+lokasi.SheetID+"&oldEmail="+encodeURIComponent(oldEmail)+"&nama="+encodeURIComponent(nama)+"&email="+encodeURIComponent(email)+"&bagian="+encodeURIComponent(bagian));
-    const d=await r.json();
+    const d=await jsonp(SCRIPT_URL+"?action=editKaryawan&sheetId="+lokasi.SheetID+"&oldEmail="+encodeURIComponent(oldEmail)+"&nama="+encodeURIComponent(nama)+"&email="+encodeURIComponent(email)+"&bagian="+encodeURIComponent(bagian));
     if(d.status==="ok"){tutupModal("modal-edit");loadKaryawan();}else alert(d.message||"Gagal menyimpan");
   }catch(e){alert("Gagal terhubung ke server");}
 }
@@ -487,11 +496,10 @@ async function simpanEdit(){
 async function loadAbsensi(){
   document.getElementById("mon-wrap").innerHTML='<div class="empty">⏳ Memuat...</div>';
   try{
-    const [ra,rk]=await Promise.all([
-      fetch(SCRIPT_URL+"?action=getAbsensi&sheetId="+lokasi.SheetID),
-      fetch(SCRIPT_URL+"?action=listKaryawan&sheetId="+lokasi.SheetID)
+    const [da,dk]=await Promise.all([
+      jsonp(SCRIPT_URL+"?action=getAbsensi&sheetId="+lokasi.SheetID),
+      jsonp(SCRIPT_URL+"?action=listKaryawan&sheetId="+lokasi.SheetID)
     ]);
-    const da=await ra.json(),dk=await rk.json();
     absensiData=da.data||[];karyawan=dk.data||[];
     hitungStat();renderMonitor();
   }catch(e){document.getElementById("mon-wrap").innerHTML='<div class="empty">❌ Gagal memuat</div>';}
@@ -525,8 +533,7 @@ async function gantiPw(){
   if(baru.length<4){showAlert("a-pw","Password baru minimal 4 karakter","error");return;}
   if(baru!==konfirm){showAlert("a-pw","Konfirmasi password tidak cocok","error");return;}
   try{
-    const r=await fetch(SCRIPT_URL+"?action=gantiPasswordAdmin&sheetId="+lokasi.SheetID+"&oldPw="+encodeURIComponent(lama)+"&newPw="+encodeURIComponent(baru));
-    const d=await r.json();
+    const d=await jsonp(SCRIPT_URL+"?action=gantiPasswordAdmin&sheetId="+lokasi.SheetID+"&oldPw="+encodeURIComponent(lama)+"&newPw="+encodeURIComponent(baru));
     if(d.status==="ok"){["pw-lama","pw-baru","pw-konfirm"].forEach(id=>document.getElementById(id).value="");showAlert("a-pw","✅ Password berhasil diganti","success");}
     else showAlert("a-pw",d.message||"Gagal mengganti password","error");
   }catch(e){showAlert("a-pw","Gagal terhubung ke server","error");}

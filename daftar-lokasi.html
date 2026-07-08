@@ -66,6 +66,19 @@ input:focus{border-color:#1D9E75}
 
 <script>
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbznX4I5u1XxiXaNwmrVoVH1u2pVLDTGhoilKBbjl-1Yoa9Q_ZNIn12NxweHPUGObsMKqg/exec";
+
+// JSONP: menghindari error CORS dari Google Apps Script
+function jsonp(url){
+  return new Promise((resolve,reject)=>{
+    const cbName="cb_"+Date.now()+"_"+Math.floor(Math.random()*100000);
+    window[cbName]=function(data){ resolve(data); delete window[cbName]; script.remove(); };
+    const script=document.createElement("script");
+    script.src=url+(url.includes("?")?"&":"?")+"callback="+cbName;
+    script.onerror=()=>{ reject(new Error("Gagal memuat")); delete window[cbName]; script.remove(); };
+    document.body.appendChild(script);
+    setTimeout(()=>{ if(window[cbName]){ reject(new Error("Waktu habis")); delete window[cbName]; script.remove(); } },15000);
+  });
+}
 let gpsLat=null, gpsLng=null;
 
 function deteksiGPS(){
@@ -103,7 +116,7 @@ async function daftar(){
       +"&lat="+gpsLat+"&lng="+gpsLng+"&radius="+radius
       +"&sheetUrl="+encodeURIComponent(sheetUrl)
       +"&adminPw="+encodeURIComponent(adminPw);
-    const r=await fetch(url);const d=await r.json();
+    const d=await jsonp(url);
     if(d.status==="ok") showResult("✅ Pendaftaran terkirim!\nMenunggu approval super admin. Kamu akan bisa pakai aplikasi setelah disetujui.","ok");
     else showResult("❌ "+(d.message||"Gagal mendaftar"),"err");
   }catch(e){showResult("Gagal terhubung ke server","err");}
